@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+  <meta name="theme-color" content="#070B16">
+  <meta name="description" content="Proxy Track client inventory portal by Proxy Marketing & Tech.">
+  <link rel="stylesheet" href="https://use.typekit.net/pmk7ptm.css">
+  <title>Proxy Track | Proxy Marketing & Tech</title>
+  <style>
+    :root {
+      --bg: #070B16;
+      --bg-deep: #030611;
+      --surface: rgba(15, 24, 48, .72);
+      --text: #F6F8FF;
+      --muted: #A9B5CF;
+      --line: rgba(255, 255, 255, .18);
+      --blue: #58A6FF;
+      --blue-bright: #58A6FF;
+      --blue-dark: #2177d8;
+      --font-display: "transducer", "Helvetica Neue", Arial, sans-serif;
+      --font-body: "transducer", "Helvetica Neue", Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { min-height: 100%; background: var(--bg-deep); }
+
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      overflow-x: hidden;
+      color: var(--text);
+      font-family: var(--font-body);
+      font-weight: 400;
+      background:
+        radial-gradient(circle at 50% 25%, rgba(27, 140, 255, .20), transparent 24rem),
+        radial-gradient(circle at 90% 90%, rgba(41, 90, 211, .14), transparent 28rem),
+        linear-gradient(145deg, #0A1123 0%, var(--bg) 46%, var(--bg-deep) 100%);
+    }
+
+    a { color: inherit; }
+
+    .page-shell {
+      position: relative;
+      isolation: isolate;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      padding: 1.25rem 1.25rem 1rem;
+    }
+
+    .page-shell::before,
+    .page-shell::after {
+      position: fixed;
+      z-index: -1;
+      width: 28rem;
+      height: 28rem;
+      border: 1px solid rgba(73, 169, 255, .10);
+      border-radius: 50%;
+      content: "";
+      pointer-events: none;
+    }
+
+    .page-shell::before { top: -20rem; left: -16rem; }
+    .page-shell::after { right: -19rem; bottom: -20rem; }
+
+    .site-header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      min-height: 58px;
+    }
+
+    .brand-logo { display: inline-flex; align-items: center; justify-content: center; }
+
+    .brand-logo img {
+      display: block;
+      width: min(190px, 54vw);
+      height: auto;
+      max-height: 54px;
+      object-fit: contain;
+    }
+
+    main {
+      display: grid;
+      flex: 1;
+      place-items: center;
+      width: 100%;
+    }
+
+    .hero {
+      width: min(100%, 760px);
+      padding: 4.25rem 0 3.5rem;
+      text-align: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      margin: 0 0 1.1rem;
+      color: var(--blue-bright);
+      font-size: .69rem;
+      font-weight: 700;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      width: .48rem;
+      height: .48rem;
+      border-radius: 50%;
+      background: var(--blue);
+      box-shadow: 0 0 5px #fff, 0 0 18px rgba(255, 255, 255, 1);
+      animation: dot-glow-breathe 2.4s ease-in-out infinite;
+      content: "";
+    }
+
+    @keyframes dot-glow-breathe {
+      0%, 100% { box-shadow: 0 0 5px #fff, 0 0 16px rgba(255, 255, 255, .95); }
+      50% { box-shadow: 0 0 8px #fff, 0 0 32px rgba(255, 255, 255, 1), 0 0 54px rgba(255, 255, 255, .75); }
+    }
+
+    h1 {
+      margin: 0;
+      color: #fff;
+      font-family: var(--font-display);
+      font-size: clamp(2.75rem, 11vw, 5.8rem);
+      font-weight: 700;
+      letter-spacing: -.055em;
+      line-height: .94;
+      text-wrap: balance;
+    }
+
+    h1 span { color: var(--blue-bright); }
+
+    .hero-copy {
+      max-width: 620px;
+      margin: 1.35rem auto 0;
+      color: var(--muted);
+      font-size: clamp(1rem, 2vw, 1.17rem);
+      line-height: 1.65;
+      text-wrap: balance;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: .8rem;
+      margin-top: 2rem;
+    }
+
+    .button {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      min-width: 136px;
+      min-height: 49px;
+      padding: .84rem 1.35rem;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      font-family: var(--font-body);
+      font-size: .95rem;
+      font-weight: 700;
+      letter-spacing: .01em;
+      line-height: 1;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform .2s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease;
+    }
+
+    .button:hover { transform: translateY(-2px); }
+    .button:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
+
+    .button-primary {
+      color: #fff;
+      background: linear-gradient(135deg, var(--blue-bright), var(--blue-dark));
+      box-shadow: 0 8px 28px rgba(27, 140, 255, .36), inset 0 1px 0 rgba(255, 255, 255, .26);
+    }
+
+    .button-primary:hover {
+      background: linear-gradient(135deg, #67B8FF, var(--blue));
+      box-shadow: 0 11px 32px rgba(27, 140, 255, .50), inset 0 1px 0 rgba(255, 255, 255, .30);
+    }
+
+    .button-secondary {
+      border-color: var(--line);
+      color: var(--text);
+      background: rgba(255, 255, 255, .025);
+    }
+
+    .button-secondary:hover { border-color: rgba(255,255,255,.48); background: rgba(255,255,255,.08); }
+
+    /* Login Form Styles */
+    .login-card {
+      width: min(100%, 400px);
+      padding: 2.5rem 2rem;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: var(--surface);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, .45);
+      text-align: center;
+    }
+
+    .login-card h2 {
+      margin: 0 0 .5rem;
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .login-subtitle {
+      margin: 0 0 1.75rem;
+      color: var(--muted);
+      font-size: .88rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.1rem;
+      text-align: left;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: .85rem 1.1rem;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(7, 11, 22, .6);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: .95rem;
+      outline: none;
+      transition: border-color .2s ease, box-shadow .2s ease;
+    }
+
+    .form-group input:focus {
+      border-color: var(--blue-bright);
+      box-shadow: 0 0 0 3px rgba(88, 166, 255, .25);
+    }
+
+    .login-card .button {
+      width: 100%;
+      margin-top: .6rem;
+    }
+
+    #login-error {
+      display: none;
+      margin-top: 1rem;
+      color: #ff6b6b;
+      font-size: .84rem;
+      line-height: 1.4;
+    }
+
+    .site-footer {
+      display: grid;
+      justify-items: center;
+      gap: .9rem;
+      width: 100%;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(255, 255, 255, .09);
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .footer-logo img { display: block; width: min(145px, 42vw); height: auto; max-height: 40px; object-fit: contain; opacity: .94; }
+
+    .contact-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: .35rem .9rem;
+      margin: 0;
+      font-size: .84rem;
+    }
+
+    .contact-list a { color: var(--muted); text-decoration: none; transition: color .2s ease; }
+    .contact-list a:hover { color: var(--blue-bright); }
+    .contact-divider { color: rgba(255, 255, 255, .3); }
+    .copyright { margin: 0; font-size: .72rem; color: rgba(169,181,207,.68); }
+
+    @media (min-width: 700px) {
+      .page-shell { padding: 1.75rem 3rem 1.4rem; }
+      .site-header { min-height: 66px; }
+      .hero { padding: 5rem 0 4.5rem; }
+      .site-footer { grid-template-columns: 1fr auto 1fr; justify-items: initial; align-items: center; }
+      .footer-logo { justify-self: start; }
+      .contact-list { justify-self: center; }
+      .copyright { justify-self: end; }
+    }
+
+    @media (max-width: 390px) {
+      .page-shell { padding-inline: 1rem; }
+      .actions { flex-direction: column; align-items: stretch; }
+      .button { width: 100%; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="site-header">
+      <a class="brand-logo" href="https://proxymarketing.ai" aria-label="Proxy Marketing & Tech home">
+        <img src="img/logo.png" alt="Proxy Marketing & Tech">
+      </a>
+    </header>
+
+    <main>
+      <!-- 1. LOGIN CARD (Shown when user is logged out) -->
+      <section id="login-section" class="login-card">
+        <h2>Proxy Track Portal</h2>
+        <p class="login-subtitle">Sign in to access your inventory and services</p>
+        <form id="login-form">
+          <div class="form-group">
+            <input type="email" id="login-email" placeholder="Email address" required autocomplete="username">
+          </div>
+          <div class="form-group">
+            <input type="password" id="login-password" placeholder="Password" required autocomplete="current-password">
+          </div>
+          <button type="submit" class="button button-primary">Sign In</button>
+          <p id="login-error"></p>
+        </form>
+      </section>
+
+      <!-- 2. HERO HUB (Shown when user is logged in) -->
+      <section id="hub-section" class="hero" aria-labelledby="page-title" style="display: none;">
+        <p class="eyebrow">Client Inventory &amp; Tracking Portal - Welcome, Acme!</p>
+        <h1 id="page-title">Proxy <span>Track</span></h1>
+        <p class="hero-copy">Every asset matters. From availability to location, ProxyTracker keeps your inventory organized, accurate, and easy to manage—so you always know what’s ready, rented, or on the move.</p>
+        <nav class="actions" aria-label="Client portal actions">
+          <a class="button button-primary" href="inventory.html">Inventory</a>
+          <a class="button button-secondary" href="mailto:support@proxymarketing.ai">Support</a>
+          <button id="logout-btn" class="button button-secondary" type="button">Log Out</button>
+        </nav>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <a class="footer-logo" href="https://proxymarketing.ai" aria-label="Proxy Marketing & Tech home">
+        <img src="img/logo.png" alt="Proxy Marketing & Tech">
+      </a>
+      <div class="contact-list">
+        <a href="mailto:support@proxymarketing.ai">support@proxymarketing.ai</a>
+        <span class="contact-divider" aria-hidden="true">•</span>
+        <a href="tel:+17172561726">(717) 256-1726</a>
+      </div>
+      <p class="copyright">© <span id="year"></span> Proxy Marketing &amp; Tech</p>
+    </footer>
+  </div>
+
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+
+ <!-- FIREBASE AUTH SCRIPT -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-analytics.js";
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      signOut,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+    // ADDED: Firestore imports to read the company tier
+    import {
+      getFirestore,
+      doc,
+      getDoc
+    } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyANylwX8bYNpqQxkb3U38HGNuch3C6CZ10",
+      authDomain: "proxytrack-database.firebaseapp.com",
+      projectId: "proxytrack-database",
+      storageBucket: "proxytrack-database.firebasestorage.app",
+      messagingSenderId: "78706187908",
+      appId: "1:78706187908:web:f9b8aff289429400d9acd1",
+      measurementId: "G-2MDW3CR02G"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const auth = getAuth(app);
+    const db = getFirestore(app); // Initialize database
+
+    const CLIENT_ID = "acme"; // The specific client profile to look up
+
+    const loginSection = document.getElementById("login-section");
+    const hubSection = document.getElementById("hub-section");
+    const loginForm = document.getElementById("login-form");
+    const loginError = document.getElementById("login-error");
+    const logoutBtn = document.getElementById("logout-btn");
+
+    // The Bouncer: Listens for authentication status and checks the tier
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        // Logged in: Hide login form, show hub
+        loginSection.style.display = "none";
+        hubSection.style.display = "block";
+
+        try {
+          // Fetch the company's profile from Firebase
+          const companyRef = doc(db, "companies", CLIENT_ID);
+          const companySnap = await getDoc(companyRef);
+
+          if (companySnap.exists()) {
+            const data = companySnap.data();
+            const pageTitle = document.getElementById("page-title");
+            const actionsNav = document.querySelector(".actions");
+
+            // If they have ProxyTrack+, upgrade the UI dynamically
+            if (data.tier === "plus") {
+              pageTitle.innerHTML = "Proxy <span>Track</span>+";
+
+              // Add the Truck Tracker button if it doesn't exist yet
+              if (!document.getElementById("tracker-btn")) {
+                const trackerBtn = document.createElement("a");
+                trackerBtn.id = "tracker-btn";
+                trackerBtn.className = "button button-primary";
+                trackerBtn.href = "#"; // Link this to the tracker page later
+                trackerBtn.innerText = "Truck Tracker+";
+
+                // Insert it right before the Support button
+                const supportBtn = document.querySelector('a[href^="mailto"]');
+                actionsNav.insertBefore(trackerBtn, supportBtn);
+              }
+
+              if (!document.getElementById("payment-btn")) {
+                const paymentBtn = document.createElement("a");
+                paymentBtn.id = "payment-btn";
+                paymentBtn.className = "button button-primary";
+                paymentBtn.href = "#"; // Link this to the payment page later
+                paymentBtn.innerText = "Payment+";
+
+                const supportBtn = document.querySelector('a[href^="mailto"]');
+                actionsNav.insertBefore(paymentBtn, supportBtn);
+              }
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching company data:", error);
+        }
+
+      } else {
+        // Not logged in: Show login form, hide hub
+        loginSection.style.display = "block";
+        hubSection.style.display = "none";
+      }
+    });
+
+    // Handle Form Submit
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      loginError.style.display = "none";
+
+      const email = document.getElementById("login-email").value;
+      const password = document.getElementById("login-password").value;
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+      } catch (error) {
+        loginError.textContent = "Invalid email or password. Please try again.";
+        loginError.style.display = "block";
+      }
+    });
+
+    // Handle Logout
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", () => {
+        signOut(auth);
+      });
+    }
+  </script>
+</body>
+</html>
+</body>
+</html>
