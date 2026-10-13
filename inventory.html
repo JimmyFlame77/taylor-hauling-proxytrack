@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+  <meta name="theme-color" content="#070B16">
+  <link rel="stylesheet" href="https://use.typekit.net/pmk7ptm.css">
+  <title>Inventory | Proxy Track</title>
+  <style>
+    :root {
+      --bg: #070B16;
+      --bg-deep: #030611;
+      --surface: rgba(15, 24, 48, .72);
+      --text: #F6F8FF;
+      --muted: #A9B5CF;
+      --line: rgba(255, 255, 255, .18);
+      --blue: #58A6FF;
+      --blue-bright: #58A6FF;
+      --blue-dark: #2177d8;
+      --font-display: "transducer", "Helvetica Neue", Arial, sans-serif;
+      --font-body: "transducer", "Helvetica Neue", Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { min-height: 100%; background: var(--bg-deep); }
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      color: var(--text);
+      font-family: var(--font-body);
+      background:
+        radial-gradient(circle at 50% 25%, rgba(27, 140, 255, .20), transparent 24rem),
+        linear-gradient(145deg, #0A1123 0%, var(--bg) 46%, var(--bg-deep) 100%);
+    }
+    a { color: inherit; text-decoration: none; }
+
+    .site-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem 2rem;
+      border-bottom: 1px solid var(--line);
+    }
+    .brand-logo img { height: clamp(28px, 8vw, 40px); }
+    .header-actions {
+      display: flex;
+      gap: .75rem;
+    }
+    
+    .button {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      padding: .75rem 1.2rem;
+      border-radius: 999px;
+      font-family: var(--font-body);
+      font-size: .9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .2s ease, background .2s ease;
+      border: 1px solid transparent;
+    }
+    .button:hover { transform: translateY(-2px); }
+    
+    .button-primary {
+      color: #fff;
+      background: linear-gradient(135deg, var(--blue-bright), var(--blue-dark));
+      box-shadow: 0 4px 15px rgba(27, 140, 255, .36);
+    }
+    .button-secondary {
+      border-color: var(--line);
+      color: var(--text);
+      background: rgba(255, 255, 255, .05);
+    }
+
+    main {
+      padding: 3rem 1.5rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 2rem;
+    }
+    @media (min-width: 768px) {
+      .dashboard { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; }
+    }
+
+    .panel-card {
+      min-width: 0;
+      overflow: hidden;
+      padding: 2rem;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: var(--surface);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, .3);
+    }
+    .panel-card h2 {
+      margin: 0 0 1.5rem;
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      color: #fff;
+    }
+
+    .form-group { min-width: 0; margin-bottom: 1.2rem; }
+    .form-group input, .form-group select {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      padding: .85rem 1.1rem;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(7, 11, 22, .6);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: .95rem;
+      outline: none;
+    }
+    .form-group input[type="date"] {
+      height: 3.3rem;
+      padding-right: .5rem;
+      padding-left: .75rem;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .form-group select { cursor: pointer; }
+    .form-group input:focus, .form-group select:focus {
+      border-color: var(--blue-bright);
+    }
+
+    .rental-item {
+      padding: 1.25rem 0;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+    }
+    .rental-item:last-child { border-bottom: none; padding-bottom: 0; }
+    
+    .rental-header {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .3rem;
+      justify-content: space-between;
+      font-weight: 700;
+      color: var(--blue-bright);
+      font-size: 1.1rem;
+    }
+    .rental-details { color: var(--muted); font-size: .9rem; line-height: 1.5; }
+    .return-btn { margin-top: .5rem; width: max-content; padding: .5rem 1rem; font-size: .8rem; }
+
+    .totals-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      padding: .75rem;
+      background: rgba(0,0,0,.2);
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      font-size: .9rem;
+    }
+    
+    /* Loading overlay */
+    #page-loader {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: var(--bg-deep); z-index: 999;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    @media (max-width: 480px) {
+      .site-header { padding: 1rem 1.25rem; }
+      main { padding: 1.75rem 1rem; }
+      .panel-card { padding: 1.25rem; }
+      .form-group input, .form-group select { font-size: 1rem; }
+      .form-group input[type="date"] { font-size: .8rem; padding-left: .6rem; padding-right: .4rem; }
+      .button { min-height: 44px; }
+      .totals-row { grid-template-columns: repeat(2, 1fr); row-gap: .35rem; }
+      .return-btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  
+  <div id="page-loader"><h2>Authenticating...</h2></div>
+
+  <header class="site-header">
+    <a class="brand-logo" href="index.html">
+      <img src="img/logo.png" alt="Proxy Marketing & Tech">
+    </a>
+    <div class="header-actions">
+      <a href="/index.html" class="button button-primary">Home</a>
+      <button id="nav-logout-btn" class="button button-secondary">Log Out</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="dashboard">
+      
+      <!-- Panel 1: Dispatch -->
+      <section class="panel-card">
+        <h2>Dispatch Equipment</h2>
+        <form id="dispatch-form">
+          <div class="form-group">
+            <select id="dumpster-size" required>
+              <option value="">Loading available inventory...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <input type="text" id="customer-name" placeholder="Customer Name" required autocomplete="off">
+          </div>
+          <div class="form-group">
+            <input type="text" id="job-address" placeholder="Job Address" required autocomplete="off">
+          </div>
+          <div class="form-group">
+            <label for="date-deployed" style="display: block; margin-bottom: .4rem; font-size: .85rem; color: var(--muted);">Date Deployed</label>
+            <input type="date" id="date-deployed" required>
+          </div>
+          <div class="form-group">
+            <label for="return-date" style="display: block; margin-bottom: .4rem; font-size: .85rem; color: var(--muted);">Expected Return</label>
+            <input type="date" id="return-date" required>
+          </div>
+          <div class="form-group">
+            <input type="text" id="job-notes" placeholder="Job Notes/Instructions" required autocomplete="off">
+          </div>
+          <button type="submit" class="button button-primary" style="width: 100%;">Send to Job</button>
+        </form>
+      </section>
+
+      <!-- Panel 2: Active Rentals -->
+      <section class="panel-card">
+        <h2>Out on Job</h2>
+        <div id="rentals-list">
+          <p style="color: var(--muted);">Loading active rentals...</p>
+        </div>
+      </section>
+      
+      <!-- Panel 3: Inventory Totals -->
+      <section class="panel-card" style="grid-column: 1 / -1;">
+        <h2>Current Inventory</h2>
+        <div id="totals-list" style="display: flex; flex-direction: column; gap: .8rem;">
+          <p style="color: var(--muted);">Loading totals...</p>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- FIREBASE SCRIPTS -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+    import { 
+      getFirestore, collection, doc, onSnapshot, 
+      addDoc, deleteDoc, updateDoc, increment 
+    } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+    // --- YOUR APP CONFIGURATION ---
+    const CLIENT_ID = "taylor"; // Change this single line for new clients
+    
+    // PASTE YOUR EXACT CONFIG KEYS HERE:
+    const firebaseConfig = {
+      apiKey: "AIzaSyANylwX8bYNpqQxkb3U38HGNuch3C6CZ10",
+      authDomain: "proxytrack-database.firebaseapp.com",
+      projectId: "proxytrack-database",
+      storageBucket: "proxytrack-database.firebasestorage.app",
+      messagingSenderId: "78706187908",
+      appId: "1:78706187908:web:f9b8aff289429400d9acd1"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const pageLoader = document.getElementById("page-loader");
+    const sizeSelect = document.getElementById("dumpster-size");
+    const rentalsList = document.getElementById("rentals-list");
+    const dispatchForm = document.getElementById("dispatch-form");
+    const totalsList = document.getElementById("totals-list");
+    const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (character) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#039;"
+    })[character]);
+
+    // 1. THE BOUNCER: Check if user is legally here
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = "index.html"; // Kick them out if not logged in
+      } else {
+        pageLoader.style.display = "none"; // Reveal the dashboard
+      }
+    });
+
+    // 2. LIVE INVENTORY FEED (Populates Dropdown & Totals Panel)
+      const inventoryRef = collection(db, "companies", CLIENT_ID, "equipment_categories");
+      onSnapshot(inventoryRef, (snapshot) => {
+        let optionsHtml = `<option value="">Select Equipment...</option>`;
+        let totalsHtml = ``;
+
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          const rentedOut = data.total_owned - data.currently_available;
+
+          // Build Dropdown (Only show if available)
+          if (data.currently_available > 0) {
+            optionsHtml += `<option value="${docSnap.id}">${data.size} (${data.currently_available} Available)</option>`;
+          }
+
+          // Build Totals Row (Shows all categories automatically)
+          totalsHtml += `
+      <div class="totals-row">
+        <strong style="color: var(--blue-bright);">${data.size}</strong>
+        <span>Total: ${data.total_owned}</span>
+        <span>In-Stock: ${data.currently_available}</span>
+        <span>Out: ${rentedOut}</span>
+      </div>
+    `;
+        });
+
+        sizeSelect.innerHTML = optionsHtml;
+        totalsList.innerHTML = totalsHtml;
+      });
+
+    // 3. LIVE RENTALS FEED (Populates the Out on Job list)
+    const rentalsRef = collection(db, "companies", CLIENT_ID, "active_rentals");
+    onSnapshot(rentalsRef, (snapshot) => {
+      if (snapshot.empty) {
+        rentalsList.innerHTML = `<p style="color: var(--muted);">Everything is in the yard.</p>`;
+        return;
+      }
+      
+      let listHtml = "";
+      snapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        listHtml += `
+          <div class="rental-item">
+            <div class="rental-header">
+              <span>${data.size}</span>
+            </div>
+            <div class="rental-details">
+              👤 ${data.customer_name} <br>
+              📍 ${data.address} <br>
+              📤 Deployed: ${data.date_deployed} <br>
+              📅 Expected Return: ${data.expected_return} <br>
+              📝 Notes: ${escapeHtml(data.notes || "No notes provided.")}
+            </div>
+            <button class="button button-secondary return-btn" data-id="${docSnap.id}" data-size="${data.size}">Return to Yard</button>
+          </div>
+        `;
+      });
+      rentalsList.innerHTML = listHtml;
+    });
+
+    // 4. DISPATCH ACTION (Send Dumpster Out)
+    dispatchForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const sizeId = sizeSelect.value;
+      const customerName = document.getElementById("customer-name").value;
+      const address = document.getElementById("job-address").value;
+      const dateDeployed = document.getElementById("date-deployed").value;
+      const returnDate = document.getElementById("return-date").value;
+      const notes = document.getElementById("job-notes").value;
+
+      try {
+        // Subtract 1 from available stock
+        await updateDoc(doc(db, "companies", CLIENT_ID, "equipment_categories", sizeId), {
+          currently_available: increment(-1)
+        });
+        
+        // Add new active rental record
+        await addDoc(collection(db, "companies", CLIENT_ID, "active_rentals"), {
+          size: sizeId,
+          customer_name: customerName,
+          address: address,
+          date_deployed: dateDeployed,
+          expected_return: returnDate,
+          notes: notes
+        });
+
+        dispatchForm.reset();
+      } catch (error) {
+        alert("Error dispatching: " + error.message);
+      }
+    });
+
+    // 5. RETURN ACTION (Bring Dumpster Back)
+    // We use event delegation since the buttons are created dynamically
+    rentalsList.addEventListener("click", async (e) => {
+      if (e.target.classList.contains("return-btn")) {
+        const rentalId = e.target.getAttribute("data-id");
+        const sizeId = e.target.getAttribute("data-size"); // Matches document ID
+
+        try {
+          // Delete active rental record
+          await deleteDoc(doc(db, "companies", CLIENT_ID, "active_rentals", rentalId));
+          
+          // Add 1 back to available stock
+          await updateDoc(doc(db, "companies", CLIENT_ID, "equipment_categories", sizeId), {
+            currently_available: increment(1)
+          });
+        } catch (error) {
+          alert("Error returning: " + error.message);
+        }
+      }
+    });
+
+    // Handle Logout
+    document.getElementById("nav-logout-btn").addEventListener("click", () => {
+      signOut(auth); // The bouncer will automatically redirect to index.html
+    });
+  </script>
+</body>
+</html>
