@@ -254,14 +254,12 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
     import { 
-      getFirestore, collection, doc, onSnapshot, 
+      getFirestore, collection, doc, getDoc, onSnapshot, 
       addDoc, deleteDoc, updateDoc, increment 
     } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
-    // --- YOUR APP CONFIGURATION ---
-    const CLIENT_ID = "taylor"; // Change this single line for new clients
+    const CLIENT_ID = "acme"; // Change this single line for new clients
     
-    // PASTE YOUR EXACT CONFIG KEYS HERE:
     const firebaseConfig = {
       apiKey: "AIzaSyANylwX8bYNpqQxkb3U38HGNuch3C6CZ10",
       authDomain: "proxytrack-database.firebaseapp.com",
@@ -281,83 +279,83 @@
     const dispatchForm = document.getElementById("dispatch-form");
     const totalsList = document.getElementById("totals-list");
     const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (character) => ({
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#039;"
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
     })[character]);
 
-    // 1. THE BOUNCER: Check if user is legally here
-    onAuthStateChanged(auth, (user) => {
+    // 1. THE BOUNCER: Multi-tenant validation
+    onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        window.location.href = "index.html"; // Kick them out if not logged in
+        window.location.href = "index.html"; 
       } else {
-        pageLoader.style.display = "none"; // Reveal the dashboard
+        try {
+          // Verify that this user's UID is authorized for this CLIENT_ID
+          const companyRef = doc(db, "companies", CLIENT_ID);
+          await getDoc(companyRef); // Fails here if not in allowedUsers
+
+          // Only initialize feeds if authorized
+          setupFeeds();
+          pageLoader.style.display = "none"; 
+        } catch (error) {
+          console.error("Authorization check failed:", error);
+          await signOut(auth);
+          window.location.href = "index.html"; // Boot out on failure
+        }
       }
     });
 
-    // 2. LIVE INVENTORY FEED (Populates Dropdown & Totals Panel)
+    // Wrapped database operations in setupFeeds so they only run after auth check succeeds
+    function setupFeeds() {
+      // LIVE INVENTORY FEED
       const inventoryRef = collection(db, "companies", CLIENT_ID, "equipment_categories");
       onSnapshot(inventoryRef, (snapshot) => {
         let optionsHtml = `<option value="">Select Equipment...</option>`;
         let totalsHtml = ``;
-
         snapshot.forEach((docSnap) => {
           const data = docSnap.data();
           const rentedOut = data.total_owned - data.currently_available;
-
-          // Build Dropdown (Only show if available)
           if (data.currently_available > 0) {
             optionsHtml += `<option value="${docSnap.id}">${data.size} (${data.currently_available} Available)</option>`;
           }
-
-          // Build Totals Row (Shows all categories automatically)
           totalsHtml += `
-      <div class="totals-row">
-        <strong style="color: var(--blue-bright);">${data.size}</strong>
-        <span>Total: ${data.total_owned}</span>
-        <span>In-Stock: ${data.currently_available}</span>
-        <span>Out: ${rentedOut}</span>
-      </div>
-    `;
+            <div class="totals-row">
+              <strong style="color: var(--blue-bright);">${data.size}</strong>
+              <span>Total: ${data.total_owned}</span>
+              <span>In-Stock: ${data.currently_available}</span>
+              <span>Out: ${rentedOut}</span>
+            </div>`;
         });
-
         sizeSelect.innerHTML = optionsHtml;
         totalsList.innerHTML = totalsHtml;
       });
 
-    // 3. LIVE RENTALS FEED (Populates the Out on Job list)
-    const rentalsRef = collection(db, "companies", CLIENT_ID, "active_rentals");
-    onSnapshot(rentalsRef, (snapshot) => {
-      if (snapshot.empty) {
-        rentalsList.innerHTML = `<p style="color: var(--muted);">Everything is in the yard.</p>`;
-        return;
-      }
-      
-      let listHtml = "";
-      snapshot.forEach((docSnap) => {
-        const data = docSnap.data();
-        listHtml += `
-          <div class="rental-item">
-            <div class="rental-header">
-              <span>${data.size}</span>
-            </div>
-            <div class="rental-details">
-              👤 ${data.customer_name} <br>
-              📍 ${data.address} <br>
-              📤 Deployed: ${data.date_deployed} <br>
-              📅 Expected Return: ${data.expected_return} <br>
-              📝 Notes: ${escapeHtml(data.notes || "No notes provided.")}
-            </div>
-            <button class="button button-secondary return-btn" data-id="${docSnap.id}" data-size="${data.size}">Return to Yard</button>
-          </div>
-        `;
+      // LIVE RENTALS FEED
+      const rentalsRef = collection(db, "companies", CLIENT_ID, "active_rentals");
+      onSnapshot(rentalsRef, (snapshot) => {
+        if (snapshot.empty) {
+          rentalsList.innerHTML = `<p style="color: var(--muted);">Everything is in the yard.</p>`;
+          return;
+        }
+        let listHtml = "";
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          listHtml += `
+            <div class="rental-item">
+              <div class="rental-header"><span>${data.size}</span></div>
+              <div class="rental-details">
+                👤 ${data.customer_name} <br>
+                📍 ${data.address} <br>
+                📤 Deployed: ${data.date_deployed} <br>
+                📅 Expected Return: ${data.expected_return} <br>
+                📝 Notes: ${escapeHtml(data.notes || "No notes provided.")}
+              </div>
+              <button class="button button-secondary return-btn" data-id="${docSnap.id}" data-size="${data.size}">Return to Yard</button>
+            </div>`;
+        });
+        rentalsList.innerHTML = listHtml;
       });
-      rentalsList.innerHTML = listHtml;
-    });
+    }
 
-    // 4. DISPATCH ACTION (Send Dumpster Out)
+    // DISPATCH ACTION
     dispatchForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const sizeId = sizeSelect.value;
@@ -368,39 +366,26 @@
       const notes = document.getElementById("job-notes").value;
 
       try {
-        // Subtract 1 from available stock
         await updateDoc(doc(db, "companies", CLIENT_ID, "equipment_categories", sizeId), {
           currently_available: increment(-1)
         });
-        
-        // Add new active rental record
         await addDoc(collection(db, "companies", CLIENT_ID, "active_rentals"), {
-          size: sizeId,
-          customer_name: customerName,
-          address: address,
-          date_deployed: dateDeployed,
-          expected_return: returnDate,
-          notes: notes
+          size: sizeId, customer_name: customerName, address: address,
+          date_deployed: dateDeployed, expected_return: returnDate, notes: notes
         });
-
         dispatchForm.reset();
       } catch (error) {
         alert("Error dispatching: " + error.message);
       }
     });
 
-    // 5. RETURN ACTION (Bring Dumpster Back)
-    // We use event delegation since the buttons are created dynamically
+    // RETURN ACTION
     rentalsList.addEventListener("click", async (e) => {
       if (e.target.classList.contains("return-btn")) {
         const rentalId = e.target.getAttribute("data-id");
-        const sizeId = e.target.getAttribute("data-size"); // Matches document ID
-
+        const sizeId = e.target.getAttribute("data-size");
         try {
-          // Delete active rental record
           await deleteDoc(doc(db, "companies", CLIENT_ID, "active_rentals", rentalId));
-          
-          // Add 1 back to available stock
           await updateDoc(doc(db, "companies", CLIENT_ID, "equipment_categories", sizeId), {
             currently_available: increment(1)
           });
@@ -412,7 +397,7 @@
 
     // Handle Logout
     document.getElementById("nav-logout-btn").addEventListener("click", () => {
-      signOut(auth); // The bouncer will automatically redirect to index.html
+      signOut(auth);
     });
   </script>
 </body>
