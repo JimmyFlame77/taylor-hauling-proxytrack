@@ -128,6 +128,9 @@
       -webkit-appearance: none;
       appearance: none;
     }
+    .form-group input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(1);
+    }
     .form-group select { cursor: pointer; }
     .form-group input:focus, .form-group select:focus {
       border-color: var(--blue-bright);
@@ -281,6 +284,14 @@
     const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (character) => ({
       "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
     })[character]);
+
+    document.querySelectorAll('.form-group input[type="date"]').forEach((dateInput) => {
+      dateInput.addEventListener("click", () => {
+        if (typeof dateInput.showPicker === "function") {
+          dateInput.showPicker();
+        }
+      });
+    });
 
     // 1. THE BOUNCER: Multi-tenant validation
     onAuthStateChanged(auth, async (user) => {
