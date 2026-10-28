@@ -216,6 +216,9 @@
             <input type="text" id="customer-name" placeholder="Customer Name" required autocomplete="off">
           </div>
           <div class="form-group">
+            <input type="tel" id="customer-phone" placeholder="Customer Phone Number" required autocomplete="off">
+          </div>
+          <div class="form-group">
             <input type="text" id="job-address" placeholder="Job Address" required autocomplete="off">
           </div>
           <div class="form-group">
@@ -354,6 +357,7 @@
               <div class="rental-header"><span>${data.size}</span></div>
               <div class="rental-details">
                 👤 ${data.customer_name} <br>
+                📞 ${escapeHtml(data.customer_phone || "—")} <br>
                 📍 ${data.address} <br>
                 📤 Deployed: ${data.date_deployed} <br>
                 📅 Expected Return: ${data.expected_return} <br>
@@ -371,6 +375,7 @@
       e.preventDefault();
       const sizeId = sizeSelect.value;
       const customerName = document.getElementById("customer-name").value;
+      const customerPhone = document.getElementById("customer-phone").value;
       const address = document.getElementById("job-address").value;
       const dateDeployed = document.getElementById("date-deployed").value;
       const returnDate = document.getElementById("return-date").value;
@@ -381,7 +386,7 @@
           currently_available: increment(-1)
         });
         await addDoc(collection(db, "companies", CLIENT_ID, "active_rentals"), {
-          size: sizeId, customer_name: customerName, address: address,
+          size: sizeId, customer_name: customerName, customer_phone: customerPhone, address: address,
           date_deployed: dateDeployed, expected_return: returnDate, notes: notes
         });
         dispatchForm.reset();
